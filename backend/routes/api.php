@@ -85,6 +85,10 @@ Route::prefix('v1')->group(function () {
         Route::put('/admin-puskesmas/{id}', [UserController::class, 'updatePuskesmasAdmin']);
         Route::delete('/admin-puskesmas/{id}', [UserController::class, 'destroyPuskesmasAdmin']);
 
+        // Orang Tua Management
+        Route::get('/orangtua/balita', [\App\Http\Controllers\Api\V1\OrangTuaController::class, 'getLinkedBalita']);
+        Route::post('/orangtua/link-balita', [\App\Http\Controllers\Api\V1\OrangTuaController::class, 'linkBalita']);
+
         // Profile Routes
         Route::get('/profile', [\App\Http\Controllers\Api\V1\ProfileController::class, 'show']);
         Route::put('/profile', [\App\Http\Controllers\Api\V1\ProfileController::class, 'update']);

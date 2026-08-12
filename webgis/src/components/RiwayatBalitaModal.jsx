@@ -115,23 +115,34 @@ export default function RiwayatBalitaModal({ isOpen, onClose, balita, onEdit }) 
     };
 
     return (
-        <div className="fixed inset-0 z-[100] bg-surface flex flex-col overflow-hidden animate-fade-in-up">
+        <div className="fixed inset-0 z-[100] bg-surface flex flex-col overflow-hidden animate-fade-in-up print:static print:bg-white print:overflow-visible print:h-auto">
                 
-                <div className="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+                {/* Print Formal Header */}
+                <div className="hidden print:block text-center pt-8 pb-4 border-b-2 border-black mb-6">
+                    <h1 className="text-2xl font-bold uppercase tracking-wider">KARTU MENUJU SEHAT (KMS) & REKAM MEDIS BALITA</h1>
+                </div>
+
+                <div className="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest print:bg-white print:border-none print:px-0 print:py-2">
                     <div>
-                        <h2 className="font-headline-md text-primary font-bold flex items-center gap-2">
-                            <span className="material-symbols-outlined text-[24px]">monitoring</span>
+                        <h2 className="font-headline-md text-primary font-bold flex items-center gap-2 print:text-black">
+                            <span className="material-symbols-outlined text-[24px] print:hidden">monitoring</span>
                             Riwayat & Evaluasi KMS
                         </h2>
-                        <p className="text-sm text-on-surface-variant mt-1">
-                            <span className="font-bold text-on-surface">{balita.nama}</span> • {balita.tanggal_lahir}
+                        <p className="text-sm text-on-surface-variant mt-1 print:text-black print:text-base">
+                            <span className="font-bold text-on-surface print:text-black">{balita.nama}</span> • {balita.tanggal_lahir} • {balita.jenis_kelamin === '1' ? 'Laki-laki' : balita.jenis_kelamin === '2' ? 'Perempuan' : balita.jenis_kelamin} • Anak dari: {balita.nama_ibu}
                         </p>
                     </div>
                     
-                    <button onClick={onClose} className="px-4 py-2 bg-surface-variant hover:bg-surface-container-high text-on-surface-variant font-label-md rounded-full flex items-center gap-2 transition-colors">
-                        <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-                        Kembali
-                    </button>
+                    <div className="flex gap-2 print:hidden">
+                        <button onClick={() => window.print()} className="px-4 py-2 bg-primary text-on-primary font-label-md rounded-full flex items-center gap-2 transition-colors hover:bg-primary/90 shadow-sm">
+                            <span className="material-symbols-outlined text-[18px]">print</span>
+                            Cetak Kartu
+                        </button>
+                        <button onClick={onClose} className="px-4 py-2 bg-surface-variant hover:bg-surface-container-high text-on-surface-variant font-label-md rounded-full flex items-center gap-2 transition-colors">
+                            <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+                            Kembali
+                        </button>
+                    </div>
                 </div>
                     
                     {/* Modal Kesimpulan Medis */}
@@ -210,7 +221,7 @@ export default function RiwayatBalitaModal({ isOpen, onClose, balita, onEdit }) 
                     )}
 
                 {/* Main Content Area */}
-                <div className="flex-1 overflow-y-auto bg-surface-container-lowest p-4 md:p-8 flex flex-col gap-8 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto bg-surface-container-lowest p-4 md:p-8 flex flex-col gap-8 custom-scrollbar print:overflow-visible print:bg-white print:p-0 print:gap-4">
                     
                     {errorMsg && (
                         <div className="bg-error-container text-on-error-container p-3 rounded-lg text-sm">
@@ -240,9 +251,9 @@ export default function RiwayatBalitaModal({ isOpen, onClose, balita, onEdit }) 
 
                             {/* Chart Section */}
                             {riwayat.length > 0 ? (
-                                <div className="bg-surface border border-outline-variant/50 rounded-2xl p-5 shadow-sm">
-                                    <h3 className="font-title-md font-bold text-on-surface mb-6 flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-primary">show_chart</span>
+                                <div className="bg-surface border border-outline-variant/50 rounded-2xl p-5 shadow-sm print:border-none print:shadow-none print:p-0">
+                                    <h3 className="font-title-md font-bold text-on-surface mb-6 flex items-center gap-2 print:mb-2">
+                                        <span className="material-symbols-outlined text-primary print:hidden">show_chart</span>
                                         Grafik Pertumbuhan Z-Score (WHO)
                                     </h3>
                                     
@@ -311,16 +322,16 @@ export default function RiwayatBalitaModal({ isOpen, onClose, balita, onEdit }) 
 
                             {/* History Table */}
                             {riwayat.length > 0 && (
-                                <div className="bg-surface rounded-2xl border border-outline-variant/50 shadow-sm overflow-hidden">
-                                    <div className="px-5 py-4 border-b border-outline-variant/50 bg-surface-container-lowest">
+                                <div className="bg-surface rounded-2xl border border-outline-variant/50 shadow-sm overflow-hidden print:border-none print:shadow-none print:rounded-none">
+                                    <div className="px-5 py-4 border-b border-outline-variant/50 bg-surface-container-lowest print:bg-white print:px-0">
                                         <h3 className="font-title-md font-bold text-on-surface flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-primary">history</span>
+                                            <span className="material-symbols-outlined text-primary print:hidden">history</span>
                                             Tabel Riwayat Pengukuran
                                         </h3>
                                     </div>
-                                    <div className="overflow-auto max-h-[500px] custom-scrollbar border-t border-outline-variant/30">
-                                        <table className="w-full text-left border-collapse">
-                                            <thead className="sticky top-0 z-10 bg-surface-container-low shadow-sm">
+                                    <div className="overflow-auto max-h-[500px] custom-scrollbar border-t border-outline-variant/30 print:max-h-none print:overflow-visible">
+                                        <table className="w-full text-left border-collapse print:text-sm">
+                                            <thead className="sticky top-0 z-10 bg-surface-container-low shadow-sm print:static print:shadow-none print:bg-white">
                                                 <tr>
                                                     <th className="py-3 px-5 font-label-sm text-on-surface-variant font-bold whitespace-nowrap border-b border-outline-variant/50">Tanggal Ukur</th>
                                                     <th className="py-3 px-5 font-label-sm text-on-surface-variant font-bold whitespace-nowrap border-b border-outline-variant/50">Tinggi (cm)</th>
@@ -334,7 +345,7 @@ export default function RiwayatBalitaModal({ isOpen, onClose, balita, onEdit }) 
                                                         <button onClick={() => setShowRules(true)} className="ml-1 text-primary hover:text-primary/80" title="Lihat Aturan WHO"><span className="material-symbols-outlined text-[14px] align-middle">info</span></button>
                                                     </th>
                                                     <th className="py-3 px-5 font-label-sm text-on-surface-variant font-bold whitespace-nowrap border-b border-outline-variant/50">Status Gizi</th>
-                                                    <th className="py-3 px-5 font-label-sm text-on-surface-variant font-bold whitespace-nowrap border-b border-outline-variant/50 bg-surface-container-low right-0 sticky">Aksi</th>
+                                                    <th className="py-3 px-5 font-label-sm text-on-surface-variant font-bold whitespace-nowrap border-b border-outline-variant/50 bg-surface-container-low right-0 sticky print:hidden">Aksi</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -365,7 +376,7 @@ export default function RiwayatBalitaModal({ isOpen, onClose, balita, onEdit }) 
                                                         <td className="py-3 px-5 font-body-sm">
                                                             <span className="font-medium text-on-surface">{item.status_gizi}</span>
                                                         </td>
-                                                        <td className="py-3 px-5 font-body-sm whitespace-nowrap bg-surface right-0 sticky border-l border-outline-variant/10 shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.05)]">
+                                                        <td className="py-3 px-5 font-body-sm whitespace-nowrap bg-surface right-0 sticky border-l border-outline-variant/10 shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.05)] print:hidden">
                                                             <div className="flex gap-2">
                                                                 <button onClick={() => setSelectedKesimpulan(item)} className="p-1.5 bg-tertiary-container text-on-tertiary-container rounded hover:bg-tertiary hover:text-on-tertiary transition-colors flex items-center justify-center" title="Kesimpulan Medis">
                                                                     <span className="material-symbols-outlined text-[16px]">summarize</span>

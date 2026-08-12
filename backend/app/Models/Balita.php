@@ -28,4 +28,11 @@ class Balita extends Model
     {
         return $this->hasMany(Antropometri::class, 'balita_id', 'balita_id');
     }
+
+    public function parents()
+    {
+        return $this->belongsToMany(\App\Models\User::class, 'user_balita', 'balita_id', 'user_id', 'balita_id', 'id')
+                    ->withPivot('hubungan')
+                    ->withTimestamps();
+    }
 }

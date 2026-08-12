@@ -31,14 +31,16 @@ export default function LoginPage() {
                 
                 // Route based on role_level
                 // 1: Kader, 2: Bidan, 3: Puskesmas, 4+: GIS Admin
-                if (user.role_level === 2) {
+                if (user.role_level === 0) {
+                    navigate('/orangtua-dashboard');
+                } else if (user.role_level === 2) {
                     navigate('/bidan-dashboard');
                 } else if (user.role_level === 3) {
                     navigate('/puskesmas-dashboard');
                 } else if (user.role_level === 4) {
                     navigate('/kabupaten-dashboard');
-                } else if (user.role_level <= 1) {
-                    navigate('/dashboard'); // Web Dashboard for Level 0-1
+                } else if (user.role_level === 1) {
+                    navigate('/dashboard'); // Web Dashboard for Kader
                 } else {
                     navigate('/gis'); // WebGIS for Level 5+
                 }

@@ -43,4 +43,11 @@ class User extends Authenticatable
         return $this->belongsToMany(\App\Models\Desa::class, 'bidan_desa', 'user_id', 'desa_id')
                     ->withTimestamps();
     }
+
+    public function balitas()
+    {
+        return $this->belongsToMany(\App\Models\Balita::class, 'user_balita', 'user_id', 'balita_id', 'id', 'balita_id')
+                    ->withPivot('hubungan')
+                    ->withTimestamps();
+    }
 }

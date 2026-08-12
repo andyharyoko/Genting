@@ -21,6 +21,9 @@ class BalitaController extends Controller
                 'm_balita.kode_desa'
             )
             ->leftJoin('m_posyandu', DB::raw('CAST("m_balita"."posyandu_id" AS BIGINT)'), '=', 'm_posyandu.id')
+            ->with(['antropometri' => function ($query) {
+                $query->orderBy('tanggal_ukur', 'desc')->limit(1);
+            }])
             ->orderBy('m_balita.nama_lengkap');
 
         // Role-based filtering
@@ -55,6 +58,8 @@ class BalitaController extends Controller
                 ? 'Laki-laki' : 'Perempuan';
             $umurBulan = \Carbon\Carbon::parse($item->tanggal_lahir)->diffInMonths(\Carbon\Carbon::now());
 
+            $latest = $item->antropometri->first();
+
             return [
                 'id'            => $item->balita_id,
                 'nama'          => $item->nama_lengkap,
@@ -66,6 +71,10 @@ class BalitaController extends Controller
                 'posyandu_id'   => $item->posyandu_id,
                 'posyandu'      => $item->posyandu_nama ?? '-',
                 'kode_desa'     => $item->kode_desa,
+                'tanggal_ukur_terakhir' => $latest ? $latest->tanggal_ukur : null,
+                'berat_badan_terakhir'  => $latest ? $latest->berat_badan : null,
+                'tinggi_badan_terakhir' => $latest ? $latest->tinggi_badan : null,
+                'status_gizi'           => $latest ? $latest->status_gizi : null,
             ];
         });
 

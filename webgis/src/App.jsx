@@ -5,6 +5,7 @@ import KaderDashboard from './pages/KaderDashboard';
 import BidanDashboard from './pages/BidanDashboard';
 import PuskesmasDashboard from './pages/PuskesmasDashboard';
 import KabupatenDashboard from './pages/KabupatenDashboard';
+import OrangTuaDashboard from './pages/OrangTuaDashboard';
 import GisDashboard from './pages/GisDashboard';
 import DaftarBalitaPage from './pages/DaftarBalitaPage';
 import ProfilKaderPage from './pages/ProfilKaderPage';
@@ -33,8 +34,14 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         
+        <Route path="/orangtua-dashboard" element={
+          <ProtectedRoute allowedRoles={[0]}>
+            <OrangTuaDashboard />
+          </ProtectedRoute>
+        } />
+
         <Route path="/dashboard" element={
-          <ProtectedRoute allowedRoles={[0, 1, 3]}>
+          <ProtectedRoute allowedRoles={[1, 3]}>
             <KaderDashboard />
           </ProtectedRoute>
         } />
