@@ -20,10 +20,10 @@ class EnsureWilayahRLS
         
         // For development/mocking purposes, we might not have full SSO yet, 
         // so we just check if user exists and has wilayah_id
-        if ($user && isset($user->wilayah_id)) {
+        if ($user && isset($user->desa_id)) {
             // Set session variable untuk PostgreSQL RLS
             // Ini akan dibaca oleh kebijakan p_balita_wilayah_access
-            DB::statement("SET app.current_wilayah_id = '{$user->wilayah_id}'");
+            DB::statement("SET app.current_wilayah_id = '{$user->desa_id}'");
             DB::statement("SET app.current_user_id = '{$user->id}'");
         }
 

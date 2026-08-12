@@ -18,7 +18,8 @@ class Balita extends Model
         'nama_lengkap',
         'tanggal_lahir',
         'jenis_kelamin',
-        'alamat',
+        'nama_ibu',
+        'alamat_lengkap',
         'kode_desa',
         'posyandu_id',
     ];

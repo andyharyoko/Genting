@@ -8,6 +8,7 @@ use App\Models\Balita;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class AntropometriController extends Controller
 {
@@ -43,6 +44,10 @@ class AntropometriController extends Controller
      */
     public function sync(Request $request)
     {
+        $user = auth()->user();
+        if ($user && $user->role_level >= 4) {
+            return response()->json(['message' => 'Role Anda tidak memiliki akses untuk menambah pengukuran Balita'], 403);
+        }
         $validated = $request->validate([
             'data' => 'required|array',
             'data.*.balita_id' => 'required|string',
@@ -80,13 +85,17 @@ class AntropometriController extends Controller
 
                 $antropometri = DB::transaction(function () use ($balitaId, $dataUkur, $usiaBulan, $jenisKelamin, $adjustedHeight) {
                     // 3. Query tabel m_who_lms untuk mendapatkan L, M, S
-                    $refWFA = DB::table('m_who_lms')
-                        ->where(['gender' => $jenisKelamin, 'age_months' => $usiaBulan, 'type' => 'weight_for_age'])
-                        ->first();
-                        
-                    $refHFA = DB::table('m_who_lms')
-                        ->where(['gender' => $jenisKelamin, 'age_months' => $usiaBulan, 'type' => 'height_for_age'])
-                        ->first();
+                    $refWFA = null;
+                    $refHFA = null;
+                    if (\Illuminate\Support\Facades\Schema::hasTable('m_who_lms')) {
+                        $refWFA = DB::table('m_who_lms')
+                            ->where(['gender' => $jenisKelamin, 'age_months' => $usiaBulan, 'type' => 'weight_for_age'])
+                            ->first();
+                            
+                        $refHFA = DB::table('m_who_lms')
+                            ->where(['gender' => $jenisKelamin, 'age_months' => $usiaBulan, 'type' => 'height_for_age'])
+                            ->first();
+                    }
 
                     $zScoreWFA = null;
                     $zScoreHFA = null;
@@ -109,14 +118,15 @@ class AntropometriController extends Controller
 
                     // 5. Simpan hasil ke t_antropometri
                     $antropometri = Antropometri::create([
+                        'antropometri_id' => (string) Str::uuid(),
                         'balita_id' => $balitaId,
                         'tanggal_ukur' => $dataUkur['tanggal_ukur'],
                         'berat_badan' => $dataUkur['berat_badan'],
                         'tinggi_badan' => $adjustedHeight,
                         'lingkar_kepala' => $dataUkur['lingkar_kepala'] ?? null,
-                        'z_score_wfa' => $zScoreWFA !== null ? round($zScoreWFA, 2) : null,
+                        'z_score' => $zScoreWFA !== null ? round($zScoreWFA, 2) : null,
                         'z_score_hfa' => $zScoreHFA !== null ? round($zScoreHFA, 2) : null,
-                        'status_stunting' => $zScoreHFA !== null ? $this->determineStatus($zScoreHFA) : 'UNKNOWN',
+                        'status_gizi' => $zScoreHFA !== null ? $this->determineStatus($zScoreHFA) : 'UNKNOWN',
                         'kader_id' => auth()->id() // Null if not authenticated via Sanctum yet
                     ]);
 
@@ -133,8 +143,8 @@ class AntropometriController extends Controller
                         ],
                         'hasil_ukur' => [
                             'z_score_hfa' => $antropometri->z_score_hfa,
-                            'z_score_wfa' => $antropometri->z_score_wfa,
-                            'status' => $antropometri->status_stunting
+                            'z_score_wfa' => $antropometri->z_score,
+                            'status' => $antropometri->status_gizi
                         ],
                         'sync_at' => now()->toIso8601String()
                     ]
@@ -174,6 +184,10 @@ class AntropometriController extends Controller
 
     public function syncBalita(Request $request)
     {
+        $user = auth()->user();
+        if ($user && $user->role_level >= 4) {
+            return response()->json(['message' => 'Role Anda tidak memiliki akses untuk menambah Balita'], 403);
+        }
         $validated = $request->validate([
             'local_id' => 'required|string',
             'nik' => 'nullable|string',
@@ -217,31 +231,35 @@ class AntropometriController extends Controller
         $formatted = $riwayat->map(function ($item) {
             $evaluasiText = null;
 
-            if ($item->z_score_wfa !== null && $item->z_score_hfa !== null && $item->balita) {
+            if ($item->z_score !== null && $item->z_score_hfa !== null && $item->balita) {
                 $jk = $item->balita->jenis_kelamin;
                 $bbAktualVal = $item->berat_badan;
                 $tbAktualVal = $item->tinggi_badan;
                 
-                // Cari Weight Age (Usia BB saat ini menyentuh Z=0 / Median)
-                $weightAgeRef = DB::table('m_who_lms')->where('type', 'weight_for_age')
-                    ->where('gender', $jk)
-                    ->orderByRaw("ABS(m - ?)", [$bbAktualVal])
-                    ->first();
-                    
-                // Cari Height Age (Usia TB saat ini menyentuh Z=0 / Median)
-                $heightAgeRef = DB::table('m_who_lms')->where('type', 'height_for_age')
-                    ->where('gender', $jk)
-                    ->orderByRaw("ABS(m - ?)", [$tbAktualVal])
-                    ->first();
+                $weightAgeRef = null;
+                $heightAgeRef = null;
+                if (\Illuminate\Support\Facades\Schema::hasTable('m_who_lms')) {
+                    // Cari Weight Age (Usia BB saat ini menyentuh Z=0 / Median)
+                    $weightAgeRef = DB::table('m_who_lms')->where('type', 'weight_for_age')
+                        ->where('gender', $jk)
+                        ->orderByRaw("ABS(m - ?)", [$bbAktualVal])
+                        ->first();
+                        
+                    // Cari Height Age (Usia TB saat ini menyentuh Z=0 / Median)
+                    $heightAgeRef = DB::table('m_who_lms')->where('type', 'height_for_age')
+                        ->where('gender', $jk)
+                        ->orderByRaw("ABS(m - ?)", [$tbAktualVal])
+                        ->first();
+                }
                     
                 if ($weightAgeRef && $heightAgeRef) {
                     $wa = $weightAgeRef->age_months;
                     $ha = $heightAgeRef->age_months;
                     
-                    if ($item->z_score_wfa < $item->z_score_hfa) {
+                    if ($item->z_score < $item->z_score_hfa) {
                         $judul = "Evaluasi Usia Ekivalen (Defisit Berat Badan):";
                         $catatan = "Ketertinggalan berat badan lebih signifikan dibandingkan tinggi badannya.";
-                    } elseif ($item->z_score_wfa > $item->z_score_hfa) {
+                    } elseif ($item->z_score > $item->z_score_hfa) {
                         $judul = "Evaluasi Usia Ekivalen (Risiko Proporsi / Perawakan Pendek):";
                         $catatan = "Pertambahan berat badan lebih cepat dibandingkan tinggi badannya.";
                     } else {
@@ -259,8 +277,9 @@ class AntropometriController extends Controller
                 'berat_badan' => $item->berat_badan,
                 'tinggi_badan' => $item->tinggi_badan,
                 'posisi_ukur' => 'Berdiri', // simplify for now
-                'z_score' => $item->z_score_wfa,
-                'status_gizi' => $item->status_stunting,
+                'z_score_wfa' => $item->z_score,
+                'z_score_hfa' => $item->z_score_hfa,
+                'status_gizi' => $item->status_gizi,
                 'evaluasi' => $evaluasiText
             ];
         });
@@ -273,6 +292,10 @@ class AntropometriController extends Controller
 
     public function destroy($id)
     {
+        $user = auth()->user();
+        if ($user && $user->role_level >= 4) {
+            return response()->json(['message' => 'Role Anda tidak memiliki akses untuk menghapus pengukuran Balita'], 403);
+        }
         $antropometri = Antropometri::find($id);
         
         if (!$antropometri) {
@@ -292,6 +315,10 @@ class AntropometriController extends Controller
 
     public function update(Request $request, $id)
     {
+        $user = auth()->user();
+        if ($user && $user->role_level >= 4) {
+            return response()->json(['message' => 'Role Anda tidak memiliki akses untuk mengubah pengukuran Balita'], 403);
+        }
         $antropometri = Antropometri::find($id);
         if (!$antropometri) {
             return response()->json(['status' => 'error', 'message' => 'Data tidak ditemukan'], 404);
@@ -320,13 +347,17 @@ class AntropometriController extends Controller
             $adjustedHeight -= 0.7;
         }
 
-        $refWFA = DB::table('m_who_lms')
-            ->where(['gender' => $jenisKelamin, 'age_months' => $usiaBulan, 'type' => 'weight_for_age'])
-            ->first();
-            
-        $refHFA = DB::table('m_who_lms')
-            ->where(['gender' => $jenisKelamin, 'age_months' => $usiaBulan, 'type' => 'height_for_age'])
-            ->first();
+        $refWFA = null;
+        $refHFA = null;
+        if (\Illuminate\Support\Facades\Schema::hasTable('m_who_lms')) {
+            $refWFA = DB::table('m_who_lms')
+                ->where(['gender' => $jenisKelamin, 'age_months' => $usiaBulan, 'type' => 'weight_for_age'])
+                ->first();
+                
+            $refHFA = DB::table('m_who_lms')
+                ->where(['gender' => $jenisKelamin, 'age_months' => $usiaBulan, 'type' => 'height_for_age'])
+                ->first();
+        }
 
         $zScoreWFA = null;
         $zScoreHFA = null;
@@ -346,9 +377,9 @@ class AntropometriController extends Controller
             'berat_badan' => $validated['berat_badan'],
             'tinggi_badan' => $adjustedHeight,
             'lingkar_kepala' => $validated['lingkar_kepala'] ?? null,
-            'z_score_wfa' => $zScoreWFA !== null ? round($zScoreWFA, 2) : null,
+            'z_score' => $zScoreWFA !== null ? round($zScoreWFA, 2) : null,
             'z_score_hfa' => $zScoreHFA !== null ? round($zScoreHFA, 2) : null,
-            'status_stunting' => $zScoreHFA !== null ? $this->determineStatus($zScoreHFA) : 'UNKNOWN',
+            'status_gizi' => $zScoreHFA !== null ? $this->determineStatus($zScoreHFA) : 'UNKNOWN',
         ]);
 
         return response()->json([

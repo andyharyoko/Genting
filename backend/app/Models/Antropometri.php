@@ -18,10 +18,12 @@ class Antropometri extends Model
         'tanggal_ukur',
         'berat_badan',
         'tinggi_badan',
+        'posisi_ukur',
         'lingkar_kepala',
+        'z_score',
         'z_score_hfa',
-        'z_score_wfa',
-        'status_stunting',
+        'status_gizi',
+        'evaluasi',
         'kader_id',
     ];
 
