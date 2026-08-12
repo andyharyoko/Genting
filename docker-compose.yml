@@ -1,6 +1,51 @@
 version: '3.8'
 
 services:
+  # Frontend: React WebGIS (Vite)
+  webgis:
+    build:
+      context: ./webgis
+      dockerfile: Dockerfile
+    container_name: genting_frontend
+    restart: always
+    ports:
+      - "5173:80"
+    networks:
+      - genting_network
+    depends_on:
+      - backend
+
+  # Backend: Laravel API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: genting_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_CONNECTION=pgsql
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=${DB_DATABASE:-genting_db}
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-secret}
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=null
+      - REDIS_PORT=6379
+    volumes:
+      # Optional: bind mount storage for persistent logs/uploads
+      - ./backend/storage:/var/www/storage
+      - ./backend/bootstrap/cache:/var/www/bootstrap/cache
+    networks:
+      - genting_network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
   # Database: PostgreSQL 15 with PostGIS
   db:
     image: postgis/postgis:15-3.3
