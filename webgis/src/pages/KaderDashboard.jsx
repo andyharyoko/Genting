@@ -28,13 +28,13 @@ export default function KaderDashboard() {
             const token = localStorage.getItem('auth_token');
             
             const [dashRes, balitaRes, profileRes] = await Promise.all([
-                axios.get('http://localhost:8000/api/v1/dashboard/kader', {
+                axios.get('/api/v1/dashboard/kader', {
                     headers: { Authorization: `Bearer ${token}` }
                 }),
-                axios.get('http://localhost:8000/api/v1/balita', {
+                axios.get('/api/v1/balita', {
                     headers: { Authorization: `Bearer ${token}` }
                 }),
-                axios.get('http://localhost:8000/api/v1/profile', {
+                axios.get('/api/v1/profile', {
                     headers: { Authorization: `Bearer ${token}` }
                 })
             ]);
@@ -63,7 +63,7 @@ export default function KaderDashboard() {
         if (!window.confirm(`Hapus data ${balita.nama}? Semua riwayat pengukuran juga akan terhapus.`)) return;
         try {
             const token = localStorage.getItem('auth_token');
-            await axios.delete(`http://localhost:8000/api/v1/balita/${balita.id}`, {
+            await axios.delete(`/api/v1/balita/${balita.id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchData();

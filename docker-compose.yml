@@ -9,7 +9,7 @@ services:
     container_name: genting_frontend
     restart: always
     ports:
-      - "5173:80"
+      - "8010:80"
     networks:
       - genting_network
     depends_on:
@@ -23,8 +23,12 @@ services:
     container_name: genting_backend
     restart: always
     ports:
-      - "8000:8000"
+      - "8011:8000"
     environment:
+      - APP_NAME=Laravel
+      - APP_ENV=production
+      - APP_KEY=base64:V/t41g0xQzUTjCE28Uhk+9SUhAEHH1sK9YiSNCa6bV4=
+      - APP_DEBUG=true
       - DB_CONNECTION=pgsql
       - DB_HOST=db
       - DB_PORT=5432
@@ -34,6 +38,8 @@ services:
       - REDIS_HOST=redis
       - REDIS_PASSWORD=null
       - REDIS_PORT=6379
+      - SESSION_DRIVER=database
+      - CACHE_STORE=database
     volumes:
       # Optional: bind mount storage for persistent logs/uploads
       - ./backend/storage:/var/www/storage

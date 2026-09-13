@@ -19,7 +19,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'genting_offline.db');
     return await openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -50,6 +50,26 @@ class DatabaseHelper {
     if (oldVersion < 4) {
       await db.execute('ALTER TABLE antropometri_drafts ADD COLUMN evaluasi TEXT;');
     }
+    if (oldVersion < 5) {
+      await _createBalitaCacheTable(db);
+    }
+  }
+
+  Future<void> _createBalitaCacheTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS balita_cache (
+        id TEXT PRIMARY KEY,
+        nama TEXT NOT NULL,
+        jenis_kelamin TEXT NOT NULL,
+        tanggal_lahir TEXT NOT NULL,
+        umur TEXT,
+        nama_ibu TEXT,
+        tanggal_ukur_terakhir TEXT,
+        berat_badan_terakhir TEXT,
+        tinggi_badan_terakhir TEXT,
+        status_gizi TEXT
+      )
+    ''');
   }
 
   Future<void> _createTables(Database db) async {
@@ -79,6 +99,8 @@ class DatabaseHelper {
         is_synced INTEGER DEFAULT 0
       )
     ''');
+    
+    await _createBalitaCacheTable(db);
   }
 
   Future<int> insertDraft(Map<String, dynamic> row) async {
@@ -164,5 +186,38 @@ class DatabaseHelper {
     }
     
     await batch.commit(noResult: true);
+  }
+
+  Future<void> cacheLaporanBalita(List<dynamic> serverData) async {
+    Database db = await database;
+    Batch batch = db.batch();
+    
+    // Clear existing cache
+    batch.delete('balita_cache');
+    
+    for (var item in serverData) {
+      batch.insert(
+        'balita_cache',
+        {
+          'id': item['id'].toString(),
+          'nama': item['nama']?.toString() ?? '',
+          'jenis_kelamin': item['jk']?.toString() ?? '',
+          'tanggal_lahir': item['tanggal_lahir']?.toString() ?? '',
+          'umur': item['umur']?.toString() ?? '',
+          'nama_ibu': item['nama_ibu']?.toString() ?? '',
+          'tanggal_ukur_terakhir': item['tanggal_ukur_terakhir']?.toString() ?? '',
+          'berat_badan_terakhir': item['berat_badan_terakhir']?.toString() ?? '',
+          'tinggi_badan_terakhir': item['tinggi_badan_terakhir']?.toString() ?? '',
+          'status_gizi': item['status_gizi']?.toString() ?? '',
+        }
+      );
+    }
+    
+    await batch.commit(noResult: true);
+  }
+
+  Future<List<Map<String, dynamic>>> getCachedLaporanBalita() async {
+    Database db = await database;
+    return await db.query('balita_cache', orderBy: 'nama ASC');
   }
 }

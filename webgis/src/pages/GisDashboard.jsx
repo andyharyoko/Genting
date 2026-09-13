@@ -13,7 +13,7 @@ export default function GisDashboard() {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem('auth_token');
-                const response = await axios.get('http://localhost:8000/api/v1/dashboard/gis', {
+                const response = await axios.get('/api/v1/dashboard/gis', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setData(response.data.data);

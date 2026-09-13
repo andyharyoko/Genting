@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'input_antropometri_page.dart';
 import 'cari_balita_page.dart';
 import 'riwayat_kms_page.dart';
+import 'laporan_page.dart';
 import '../database/database_helper.dart';
 import '../services/api_service.dart';
 
@@ -39,6 +40,10 @@ class _KaderDashboardState extends State<KaderDashboard> {
 
     final syncedBalita = await ApiService().syncBalitaDrafts();
     final syncedUkur = await ApiService().syncDrafts();
+    
+    // Also pull latest data for Laporan (this updates the local cache)
+    await ApiService().fetchLaporanBalita();
+    
     final syncedCount = syncedBalita + syncedUkur;
     
     setState(() {
@@ -169,6 +174,13 @@ class _KaderDashboardState extends State<KaderDashboard> {
                   ),
                   _buildMenuCard(
                     context,
+                    icon: Icons.summarize,
+                    title: 'Laporan',
+                    subtitle: 'Data & Statistik',
+                    color: Colors.red,
+                  ),
+                  _buildMenuCard(
+                    context,
                     icon: Icons.restaurant_menu,
                     title: 'Distribusi MBG',
                     subtitle: 'Scan Dompet Gizi',
@@ -209,6 +221,13 @@ class _KaderDashboardState extends State<KaderDashboard> {
             context,
             MaterialPageRoute(
               builder: (context) => const CariBalitaPage(),
+            ),
+          );
+        } else if (title == 'Laporan') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const LaporanPage(),
             ),
           );
         } else {

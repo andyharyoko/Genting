@@ -29,7 +29,7 @@ const OrangTuaDashboard = () => {
                 setUser(userData);
             }
 
-            const res = await axios.get('http://localhost:8000/api/v1/orangtua/balita', {
+            const res = await axios.get('/api/v1/orangtua/balita', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setBalitaList(res.data.data);
@@ -54,7 +54,7 @@ const OrangTuaDashboard = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('auth_token');
-            await axios.post('http://localhost:8000/api/v1/orangtua/link-balita', linkForm, {
+            await axios.post('/api/v1/orangtua/link-balita', linkForm, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert('Berhasil menautkan data Balita!');

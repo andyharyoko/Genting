@@ -1,4 +1,4 @@
-FROM php:8.2-cli
+FROM php:8.4-cli
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -25,7 +25,13 @@ WORKDIR /var/www
 COPY . /var/www
 
 # Install composer dependencies
-RUN composer install --no-interaction --optimize-autoloader
+RUN composer install --no-interaction --optimize-autoloader --ignore-platform-reqs
+
+# Ensure docker network hosts for DB and Redis
+RUN if [ -f /var/www/.env ]; then \
+        sed -i 's/DB_HOST=127.0.0.1/DB_HOST=db/' /var/www/.env && \
+        sed -i 's/REDIS_HOST=127.0.0.1/REDIS_HOST=redis/' /var/www/.env; \
+    fi
 
 # Change permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache

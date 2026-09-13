@@ -48,10 +48,10 @@ export default function BidanDashboard() {
             const headers = { Authorization: `Bearer ${token}` };
             
             const [dashRes, balitaRes, kaderRes, posyanduRes] = await Promise.all([
-                axios.get('http://localhost:8000/api/v1/dashboard/kader', { headers }), // We can reuse kader dashboard endpoint for basic stats
-                axios.get('http://localhost:8000/api/v1/balita', { headers }),
-                axios.get('http://localhost:8000/api/v1/kader', { headers }),
-                axios.get('http://localhost:8000/api/v1/posyandu', { headers })
+                axios.get('/api/v1/dashboard/kader', { headers }), // We can reuse kader dashboard endpoint for basic stats
+                axios.get('/api/v1/balita', { headers }),
+                axios.get('/api/v1/kader', { headers }),
+                axios.get('/api/v1/posyandu', { headers })
             ]);
             
             // Adjust user role title
@@ -64,7 +64,7 @@ export default function BidanDashboard() {
             setPosyanduList(posyanduRes.data.data);
 
             if (dashData.user.kabupaten_id) {
-                axios.get(`http://localhost:8000/api/v1/regions/puskesmas/${dashData.user.kabupaten_id}`, { headers })
+                axios.get(`/api/v1/regions/puskesmas/${dashData.user.kabupaten_id}`, { headers })
                      .then(res => setPuskesmasOptions(res.data.data))
                      .catch(err => console.error(err));
             }
@@ -91,9 +91,9 @@ export default function BidanDashboard() {
         try {
             const token = localStorage.getItem('auth_token');
             if (editPosyanduData) {
-                await axios.put(`http://localhost:8000/api/v1/posyandu/${editPosyanduData.id}`, posyanduForm, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.put(`/api/v1/posyandu/${editPosyanduData.id}`, posyanduForm, { headers: { Authorization: `Bearer ${token}` } });
             } else {
-                await axios.post('http://localhost:8000/api/v1/posyandu', posyanduForm, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.post('/api/v1/posyandu', posyanduForm, { headers: { Authorization: `Bearer ${token}` } });
             }
             setIsPosyanduModalOpen(false);
             fetchData();
@@ -106,7 +106,7 @@ export default function BidanDashboard() {
         if (!window.confirm('Yakin ingin menghapus Posyandu ini?')) return;
         try {
             const token = localStorage.getItem('auth_token');
-            await axios.delete(`http://localhost:8000/api/v1/posyandu/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.delete(`/api/v1/posyandu/${id}`, { headers: { Authorization: `Bearer ${token}` } });
             fetchData();
         } catch (err) {
             alert(err.response?.data?.message || 'Gagal menghapus Posyandu');
@@ -119,9 +119,9 @@ export default function BidanDashboard() {
         try {
             const token = localStorage.getItem('auth_token');
             if (editKaderData) {
-                await axios.put(`http://localhost:8000/api/v1/kader/${editKaderData.id}`, kaderForm, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.put(`/api/v1/kader/${editKaderData.id}`, kaderForm, { headers: { Authorization: `Bearer ${token}` } });
             } else {
-                await axios.post('http://localhost:8000/api/v1/kader', kaderForm, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.post('/api/v1/kader', kaderForm, { headers: { Authorization: `Bearer ${token}` } });
             }
             setIsKaderModalOpen(false);
             fetchData();
@@ -134,7 +134,7 @@ export default function BidanDashboard() {
         if (!window.confirm('Yakin ingin menghapus Kader ini?')) return;
         try {
             const token = localStorage.getItem('auth_token');
-            await axios.delete(`http://localhost:8000/api/v1/kader/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.delete(`/api/v1/kader/${id}`, { headers: { Authorization: `Bearer ${token}` } });
             fetchData();
         } catch (err) {
             alert(err.response?.data?.message || 'Gagal menghapus Kader');

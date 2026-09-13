@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "GentingV2 - Offline-First Field Sync Sequence",
+    "output": "offline_sync_sequence.html",
+    "viewBox": [1080, 580],
+    "column_fit": "spread",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "local-recording",
+        "label": "Local Offline Logging",
+        "focus": ["kader", "mobile", "sqlite"],
+        "note": "Field measurement captured and stored directly into SQLite without internet requirement."
+      },
+      {
+        "id": "cloud-sync",
+        "label": "Server Sync & Z-Score",
+        "focus": ["mobile", "gateway", "api", "auth", "postgres"],
+        "note": "Bulk synchronization to Laravel API with Sanctum authentication and WHO LMS calculations."
+      }
+    ]
+  },
+  "participants": [
+    { "id": "kader", "type": "external", "label": "Kader Posyandu", "sublabel": "Field Worker" },
+    { "id": "mobile", "type": "frontend", "label": "Mobile App", "sublabel": "Flutter Client" },
+    { "id": "sqlite", "type": "database", "label": "SQLite Local", "sublabel": "Offline DB" },
+    { "id": "gateway", "type": "cloud", "label": "Nginx Gateway", "sublabel": "Port 8010" },
+    { "id": "api", "type": "backend", "label": "Laravel API", "sublabel": "PHP 8.4 Engine" },
+    { "id": "auth", "type": "security", "label": "Sanctum RLS", "sublabel": "Scope Guard" },
+    { "id": "postgres", "type": "database", "label": "PostgreSQL", "sublabel": "PostGIS DB" }
+  ],
+  "segments": [
+    { "from": 155, "to": 235, "label": "Offline Capture" },
+    { "from": 250, "to": 430, "label": "Server Sync & Z-Score" },
+    { "from": 445, "to": 495, "label": "Reconciliation" }
+  ],
+  "messages": [
+    { "id": "input-meas", "from": "kader", "to": "mobile", "y": 165, "label": "input measurement", "variant": "default" },
+    { "id": "save-local", "from": "mobile", "to": "sqlite", "y": 195, "label": "INSERT (sync_status=0)", "variant": "emphasis" },
+    { "id": "ack-local", "from": "sqlite", "to": "mobile", "y": 225, "label": "saved locally", "variant": "return" },
+    { "id": "post-sync", "from": "mobile", "to": "gateway", "y": 260, "label": "POST /api/v1/sync", "variant": "emphasis" },
+    { "id": "proxy-api", "from": "gateway", "to": "api", "y": 290, "label": "proxy request", "variant": "emphasis" },
+    { "id": "check-token", "from": "api", "to": "auth", "y": 325, "label": "verify Bearer token", "variant": "security" },
+    { "id": "token-valid", "from": "auth", "to": "api", "y": 355, "label": "scope valid", "variant": "return" },
+    { "id": "db-commit", "from": "api", "to": "postgres", "y": 390, "label": "Z-Score LMS + INSERT", "variant": "emphasis" },
+    { "id": "commit-ok", "from": "postgres", "to": "api", "y": 420, "label": "records committed", "variant": "return" },
+    { "id": "res-mobile", "from": "api", "to": "mobile", "y": 455, "label": "200 Sync OK", "variant": "return" },
+    { "id": "mark-synced", "from": "mobile", "to": "sqlite", "y": 485, "label": "SET sync_status=1", "variant": "dashed" }
+  ],
+  "activations": [
+    { "participant": "mobile", "from": 160, "to": 490, "type": "frontend" },
+    { "participant": "sqlite", "from": 190, "to": 230, "type": "database" },
+    { "participant": "gateway", "from": 255, "to": 295, "type": "cloud" },
+    { "participant": "api", "from": 285, "to": 460, "type": "backend" },
+    { "participant": "auth", "from": 320, "to": 360, "type": "security" },
+    { "participant": "postgres", "from": 385, "to": 425, "type": "database" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Offline-First Resilience",
+      "items": [
+        "Kaders can operate seamlessly in remote posyandu locations without cellular connectivity",
+        "Measurements are committed locally into SQLite with a pending flag (sync_status=0)",
+        "Local validation ensures height, weight, and measurement posture conform to WHO criteria"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Transactional Ingestion & Security",
+      "items": [
+        "Sanctum bearer token verification confirms Kader's assigned Posyandu and village jurisdiction",
+        "Laravel executes DB transaction to look up WHO LMS tables and calculate HAZ, WAZ, and WHZ",
+        "Returns batch confirmation containing generated server primary keys for local state update"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Zero-Loss Replay",
+      "items": [
+        "Mobile client marks local SQLite records as synced (sync_status=1) upon server HTTP 200",
+        "Idempotent sync endpoint safely handles network drops and retries without duplicate patient records",
+        "Sync events immediately feed downstream PostGIS spatial clustering and web GIS dashboards"
+      ]
+    }
+  ]
+}

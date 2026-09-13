@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const API = 'http://localhost:8000/api/v1';
+const API = '/api/v1';
 const token = () => localStorage.getItem('auth_token');
 const authHeader = () => ({ Authorization: `Bearer ${token()}` });
 

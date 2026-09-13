@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "GentingV2 - Stunting Screening & Geospatial Data Flow",
+    "output": "stunting_screening_dataflow.html",
+    "viewBox": [1080, 520],
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "antropometri-path",
+        "label": "Anthropometry Lifecycle",
+        "focus": ["posyandu", "sync-api", "zscore-calc", "db-measurement", "report-kms"],
+        "note": "Path from field anthropometric measurement to WHO score assessment and digital KMS generation."
+      },
+      {
+        "id": "spatial-intervention",
+        "label": "Spatial Hotspot & MBG",
+        "focus": ["db-measurement", "db-spatial", "gis-dashboard", "mbg-action"],
+        "note": "Geospatial clustering of stunting cases within 2km radius to allocate MBG emergency kitchens."
+      }
+    ]
+  },
+  "stages": [
+    { "label": "Collection" },
+    { "label": "Ingest" },
+    { "label": "Evaluation" },
+    { "label": "Persistence" },
+    { "label": "Intervention" }
+  ],
+  "nodes": [
+    { "id": "posyandu", "type": "frontend", "label": "Posyandu Kader", "sublabel": "BB, TB, LILA, Posisi", "stage": 0, "row": 0, "tag": "Mobile/Web" },
+    { "id": "orangtua", "type": "frontend", "label": "Orang Tua / Wali", "sublabel": "NIK Link & Riwayat", "stage": 0, "row": 2, "tag": "Level 0" },
+    { "id": "sync-api", "type": "backend", "label": "Sync & RLS API", "sublabel": "Laravel 13 Sanctum", "stage": 1, "row": 0, "tag": "Sanitized" },
+    { "id": "region-gate", "type": "security", "label": "Wilayah Scope", "sublabel": "EnsureWilayahRLS", "stage": 1, "row": 2, "tag": "Jurisdiction" },
+    { "id": "zscore-calc", "type": "backend", "label": "WHO LMS Engine", "sublabel": "HAZ, WAZ, WHZ Formula", "stage": 2, "row": 0, "tag": "Z-Scores" },
+    { "id": "who-master", "type": "database", "label": "WHO Reference", "sublabel": "m_who_lms Master", "stage": 2, "row": 2, "tag": "WHO LMS" },
+    { "id": "db-measurement", "type": "database", "label": "Antropometri DB", "sublabel": "t_antropometri Store", "stage": 3, "row": 0, "tag": "Records" },
+    { "id": "db-spatial", "type": "database", "label": "PostGIS Spatial", "sublabel": "ST_Buffer 2km Zone", "stage": 3, "row": 1, "tag": "Geometry" },
+    { "id": "report-kms", "type": "backend", "label": "KMS & Clinical", "sublabel": "Grafik Tumbuh Kembang", "stage": 4, "row": 0, "tag": "Kader/Bidan" },
+    { "id": "gis-dashboard", "type": "cloud", "label": "GIS Heatmap", "sublabel": "Posyandu Buffer Zone", "stage": 4, "row": 1, "tag": "Kabupaten" },
+    { "id": "mbg-action", "type": "backend", "label": "Dapur MBG Route", "sublabel": "Hotspot Centroid", "stage": 4, "row": 2, "tag": "Intervensi" }
+  ],
+  "flows": [
+    { "id": "kader-to-sync", "from": "posyandu", "to": "sync-api", "label": "raw anthropometry", "classification": "field payload", "variant": "emphasis", "route": "straight" },
+    { "id": "parent-to-region", "from": "orangtua", "to": "region-gate", "label": "link NIK", "classification": "auth request", "variant": "default", "route": "straight" },
+    { "id": "region-to-sync", "from": "region-gate", "to": "sync-api", "label": "authorized scope", "classification": "policy pass", "variant": "security", "fromSide": "top", "toSide": "bottom", "route": "straight", "labelAt": [315, 271] },
+    { "id": "sync-to-engine", "from": "sync-api", "to": "zscore-calc", "label": "adjusted height", "classification": "normalized", "variant": "emphasis", "route": "straight" },
+    { "id": "who-to-engine", "from": "who-master", "to": "zscore-calc", "label": "lookup L, M, S", "classification": "standards", "variant": "default", "fromSide": "top", "toSide": "bottom", "route": "straight", "labelAt": [530, 271] },
+    { "id": "engine-to-store", "from": "zscore-calc", "to": "db-measurement", "label": "classified status", "classification": "persisted", "variant": "emphasis", "route": "straight" },
+    { "id": "store-to-spatial", "from": "db-measurement", "to": "db-spatial", "label": "stunting coordinates", "classification": "spatial geo", "variant": "default", "fromSide": "bottom", "toSide": "top", "route": "straight", "labelAt": [745, 214] },
+    { "id": "store-to-kms", "from": "db-measurement", "to": "report-kms", "label": "KMS chart series", "classification": "clinical view", "variant": "emphasis", "route": "straight" },
+    { "id": "spatial-to-gis", "from": "db-spatial", "to": "gis-dashboard", "label": "cluster density", "classification": "polygon map", "variant": "emphasis", "route": "straight" },
+    { "id": "spatial-to-mbg", "from": "db-spatial", "to": "mbg-action", "label": "centroid dispatch", "classification": "nutrition action", "variant": "dashed", "fromSide": "bottom", "toSide": "left", "via": [[745, 385]], "labelAt": [790, 375] }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Field Collection to Evaluation",
+      "items": [
+        "Measurements taken by Posyandu Kaders are submitted with height measurement position (Berdiri / Terlentang)",
+        "WHO Engine adjusts height by +/- 0.7cm according to age threshold before LMS lookup",
+        "Calculates Z-score metrics (HAZ, WAZ, WHZ) and tags status: Normal, Stunted, or Severely Stunted"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Data Governance & Wilayah Scope",
+      "items": [
+        "EnsureWilayahRLS middleware enforces hierarchical access limits (Kader -> Puskesmas -> Kabupaten)",
+        "Sensitive medical identity (NIK and Balita profile) is segregated with granular role controls",
+        "Orang Tua can view digital KMS records only for explicitly linked Balita NIKs"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Geospatial & Nutrition Action",
+      "items": [
+        "PostGIS calculates 2km radius buffer around Posyandus to monitor high-risk coverage blank spots",
+        "Centroid of stunting clusters determines the optimal deployment location for Dapur Umum MBG",
+        "Puskesmas and Kabupaten officials monitor real-time distribution routes and nutritional recovery progress"
+      ]
+    }
+  ]
+}

@@ -36,7 +36,7 @@ export default function UkurBalitaModal({ isOpen, onClose, onSuccess, balita, ed
             const fetchLast = async () => {
                 try {
                     const token = localStorage.getItem('auth_token');
-                    const res = await axios.get(`http://localhost:8000/api/v1/antropometri/balita/${balita.id}`, { headers: { Authorization: `Bearer ${token}` } });
+                    const res = await axios.get(`/api/v1/antropometri/balita/${balita.id}`, { headers: { Authorization: `Bearer ${token}` } });
                     if (res.data?.data?.length > 0) {
                         setLastMeasure(res.data.data[0]); // newest is first due to descending sort in backend
                     } else {
@@ -63,13 +63,13 @@ export default function UkurBalitaModal({ isOpen, onClose, onSuccess, balita, ed
         try {
             const token = localStorage.getItem('auth_token');
             if (editData) {
-                await axios.put(`http://localhost:8000/api/v1/antropometri/${editData.id}`, {
+                await axios.put(`/api/v1/antropometri/${editData.id}`, {
                     ...formData
                 }, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
             } else {
-                await axios.post('http://localhost:8000/api/v1/sync/antropometri', {
+                await axios.post('/api/v1/sync/antropometri', {
                     data: [{
                         id: crypto.randomUUID(),
                         balita_id: balita.id,

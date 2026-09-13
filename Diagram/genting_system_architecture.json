@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "GentingV2 - Full Stack Stunting Monitoring Architecture",
+    "output": "genting_system_architecture.html",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "full-flow",
+        "label": "Full System Overview",
+        "focus": ["client-web", "client-mobile", "nginx-gateway", "backend-api", "db-postgis", "cache-redis"],
+        "note": "Complete request, processing, and storage lifecycle of the GentingV2 platform."
+      },
+      {
+        "id": "spatial-engine",
+        "label": "Geospatial & WHO Analytics",
+        "focus": ["backend-api", "who-engine", "db-postgis", "gis-hotspot"],
+        "note": "Anthropometry LMS Z-Score evaluation and PostGIS 2km buffer proximity hotspot detection."
+      },
+      {
+        "id": "security-and-sync",
+        "label": "Security & Offline Sync",
+        "focus": ["client-mobile", "auth-sanctum", "nginx-gateway", "backend-api"],
+        "note": "Offline-first field synchronization protected by Sanctum auth tokens and Wilayah RLS middleware."
+      }
+    ]
+  },
+  "components": [
+    { "id": "external-wilayah", "type": "external", "label": "EMSIFA Wilayah API", "sublabel": "Indonesia Region Master", "pos": [50, 100], "size": [160, 65], "tag": "Prov/Kab/Kec/Desa" },
+    { "id": "client-web", "type": "frontend", "label": "WebGIS Dashboard", "sublabel": "React 19 + Leaflet :8010", "pos": [50, 260], "size": [160, 65], "tag": "Multi-Role Web" },
+    { "id": "client-mobile", "type": "frontend", "label": "Kader Mobile App", "sublabel": "Flutter + SQLite", "pos": [50, 420], "size": [160, 65], "tag": "Offline-First" },
+    { "id": "auth-sanctum", "type": "security", "label": "Auth & Wilayah RLS", "sublabel": "Sanctum Token Gate", "pos": [290, 100], "size": [160, 65], "tag": "Role-Level 0-4" },
+    { "id": "nginx-gateway", "type": "cloud", "label": "Nginx Gateway", "sublabel": "Port 8010 / SPA & API", "pos": [290, 260], "size": [160, 65], "tag": "Docker Ingress" },
+    { "id": "who-engine", "type": "backend", "label": "WHO Z-Score Engine", "sublabel": "Anthropometric LMS", "pos": [530, 100], "size": [160, 65], "tag": "HAZ, WAZ, WHZ" },
+    { "id": "backend-api", "type": "backend", "label": "Genting Laravel API", "sublabel": "PHP 8.4-cli :8011", "pos": [530, 260], "size": [160, 65], "tag": "RESTful Core" },
+    { "id": "cache-redis", "type": "database", "label": "Redis 7 Cache", "sublabel": "Session & Queue :6389", "pos": [770, 100], "size": [160, 65], "brand": "redis" },
+    { "id": "db-postgis", "type": "database", "label": "PostgreSQL 15 PostGIS", "sublabel": "genting_db :5432", "pos": [770, 260], "size": [160, 65], "brand": "postgresql" },
+    { "id": "gis-hotspot", "type": "cloud", "label": "Spatial Proximity Zone", "sublabel": "ST_Buffer 2km Hotspot", "pos": [770, 420], "size": [160, 65], "tag": "Dapur MBG Routing" }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Docker Compose Stack (genting_network)",
+      "wraps": ["auth-sanctum", "nginx-gateway", "who-engine", "backend-api", "cache-redis", "db-postgis", "gis-hotspot"]
+    },
+    {
+      "kind": "security-group",
+      "label": "Core API & Durable Storage",
+      "wraps": ["backend-api", "db-postgis", "cache-redis"]
+    }
+  ],
+  "connections": [
+    { "id": "client-to-nginx", "from": "client-web", "to": "nginx-gateway", "label": "HTTP :8010", "variant": "emphasis" },
+    { "id": "web-to-wilayah", "from": "client-web", "to": "external-wilayah", "label": "fetch master", "variant": "dashed", "fromSide": "top", "toSide": "bottom" },
+    { "id": "mobile-to-api", "from": "client-mobile", "to": "backend-api", "label": "sync balita", "variant": "default", "fromSide": "right", "toSide": "bottom" },
+    { "id": "nginx-to-auth", "from": "nginx-gateway", "to": "auth-sanctum", "label": "bearer token", "variant": "security", "fromSide": "top", "toSide": "bottom" },
+    { "id": "nginx-to-api", "from": "nginx-gateway", "to": "backend-api", "label": "proxy /api/", "variant": "emphasis" },
+    { "id": "api-to-who", "from": "backend-api", "to": "who-engine", "label": "calc z-score", "fromSide": "top", "toSide": "bottom", "labelAt": [610, 195] },
+    { "id": "api-to-db", "from": "backend-api", "to": "db-postgis", "label": "PDO SQL", "variant": "emphasis" },
+    { "id": "api-to-redis", "from": "backend-api", "to": "cache-redis", "label": "cache hits", "fromSide": "top", "toSide": "left", "labelAt": [715, 185] },
+    { "id": "db-to-hotspot", "from": "db-postgis", "to": "gis-hotspot", "label": "spatial query", "fromSide": "bottom", "toSide": "top", "labelAt": [850, 360] }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Presentation & Clients",
+      "items": [
+        "WebGIS (React 19 + Leaflet) provides tailored dashboards for Kader, Bidan, Puskesmas, and Kabupaten",
+        "Mobile App (Flutter) enables field measurements with local SQLite offline-first synchronisation",
+        "EMSIFA Wilayah API provides cascaded regional codes across provinces down to villages"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Ingress & Business Logic",
+      "items": [
+        "Nginx reverse proxy unifies static SPA assets and backend API routing onto single port 8010",
+        "Laravel 13 API validates payload and invokes the WHO LMS engine for HAZ/WAZ/WHZ calculation",
+        "EnsureWilayahRLS middleware isolates patient health records based on authenticated admin jurisdiction"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Geospatial & Storage",
+      "items": [
+        "PostgreSQL 15 with PostGIS runs ST_Buffer 2km queries to map stunting hotspot clusters",
+        "Identifies optimal kitchen locations (Dapur Umum MBG) from stunting hotspot centroids",
+        "Redis 7 handles application caching, session persistence, and API request rate limiting"
+      ]
+    }
+  ]
+}

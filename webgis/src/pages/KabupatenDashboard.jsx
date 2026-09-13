@@ -59,12 +59,12 @@ export default function KabupatenDashboard() {
             const headers = { Authorization: `Bearer ${token}` };
             
             const [dashRes, balitaRes, kaderRes, bidanRes, posyanduRes, adminPuskesmasRes] = await Promise.all([
-                axios.get('http://localhost:8000/api/v1/dashboard/kader', { headers }), // We can reuse kader dashboard endpoint for basic stats
-                axios.get('http://localhost:8000/api/v1/balita', { headers }),
-                axios.get('http://localhost:8000/api/v1/kader', { headers }),
-                axios.get('http://localhost:8000/api/v1/bidan', { headers }),
-                axios.get('http://localhost:8000/api/v1/posyandu', { headers }),
-                axios.get('http://localhost:8000/api/v1/admin-puskesmas', { headers })
+                axios.get('/api/v1/dashboard/kader', { headers }), // We can reuse kader dashboard endpoint for basic stats
+                axios.get('/api/v1/balita', { headers }),
+                axios.get('/api/v1/kader', { headers }),
+                axios.get('/api/v1/bidan', { headers }),
+                axios.get('/api/v1/posyandu', { headers }),
+                axios.get('/api/v1/admin-puskesmas', { headers })
             ]);
             
             // Adjust user role title
@@ -79,12 +79,12 @@ export default function KabupatenDashboard() {
             setAdminPuskesmasList(adminPuskesmasRes.data.data);
 
             if (dashData.user.kabupaten_id) {
-                axios.get(`http://localhost:8000/api/v1/regions/puskesmas/${dashData.user.kabupaten_id}`, { headers })
+                axios.get(`/api/v1/regions/puskesmas/${dashData.user.kabupaten_id}`, { headers })
                      .then(res => { /* setPuskesmasOptions(res.data.data) */ })
                      .catch(err => console.error(err));
             }
             if (dashData.user.kecamatan_id) {
-                axios.get(`http://localhost:8000/api/v1/regions/desa/${dashData.user.kecamatan_id}`, { headers })
+                axios.get(`/api/v1/regions/desa/${dashData.user.kecamatan_id}`, { headers })
                      .then(res => setDesaOptions(res.data.data))
                      .catch(err => console.error(err));
             }
@@ -112,9 +112,9 @@ export default function KabupatenDashboard() {
         try {
             const token = localStorage.getItem('auth_token');
             if (editAdminPuskesmasId) {
-                await axios.put(`http://localhost:8000/api/v1/admin-puskesmas/${editAdminPuskesmasId}`, adminPuskesmasForm, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.put(`/api/v1/admin-puskesmas/${editAdminPuskesmasId}`, adminPuskesmasForm, { headers: { Authorization: `Bearer ${token}` } });
             } else {
-                await axios.post('http://localhost:8000/api/v1/admin-puskesmas', adminPuskesmasForm, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.post('/api/v1/admin-puskesmas', adminPuskesmasForm, { headers: { Authorization: `Bearer ${token}` } });
             }
             setShowAdminPuskesmasModal(false);
             fetchData();
@@ -127,7 +127,7 @@ export default function KabupatenDashboard() {
         if (!window.confirm('Yakin ingin menghapus Admin Puskesmas ini?')) return;
         try {
             const token = localStorage.getItem('auth_token');
-            await axios.delete(`http://localhost:8000/api/v1/admin-puskesmas/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.delete(`/api/v1/admin-puskesmas/${id}`, { headers: { Authorization: `Bearer ${token}` } });
             fetchData();
         } catch (err) {
             alert(err.response?.data?.message || 'Gagal menghapus Admin Puskesmas');
@@ -140,9 +140,9 @@ export default function KabupatenDashboard() {
         try {
             const token = localStorage.getItem('auth_token');
             if (editPosyanduData) {
-                await axios.put(`http://localhost:8000/api/v1/posyandu/${editPosyanduData.id}`, posyanduForm, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.put(`/api/v1/posyandu/${editPosyanduData.id}`, posyanduForm, { headers: { Authorization: `Bearer ${token}` } });
             } else {
-                await axios.post('http://localhost:8000/api/v1/posyandu', posyanduForm, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.post('/api/v1/posyandu', posyanduForm, { headers: { Authorization: `Bearer ${token}` } });
             }
             setIsPosyanduModalOpen(false);
             fetchData();
@@ -155,7 +155,7 @@ export default function KabupatenDashboard() {
         if (!window.confirm('Yakin ingin menghapus Posyandu ini?')) return;
         try {
             const token = localStorage.getItem('auth_token');
-            await axios.delete(`http://localhost:8000/api/v1/posyandu/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.delete(`/api/v1/posyandu/${id}`, { headers: { Authorization: `Bearer ${token}` } });
             fetchData();
         } catch (err) {
             alert(err.response?.data?.message || 'Gagal menghapus Posyandu');
@@ -168,9 +168,9 @@ export default function KabupatenDashboard() {
         try {
             const token = localStorage.getItem('auth_token');
             if (editKaderData) {
-                await axios.put(`http://localhost:8000/api/v1/kader/${editKaderData.id}`, kaderForm, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.put(`/api/v1/kader/${editKaderData.id}`, kaderForm, { headers: { Authorization: `Bearer ${token}` } });
             } else {
-                await axios.post('http://localhost:8000/api/v1/kader', kaderForm, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.post('/api/v1/kader', kaderForm, { headers: { Authorization: `Bearer ${token}` } });
             }
             setIsKaderModalOpen(false);
             fetchData();
@@ -183,7 +183,7 @@ export default function KabupatenDashboard() {
         if (!window.confirm('Yakin ingin menghapus Kader ini?')) return;
         try {
             const token = localStorage.getItem('auth_token');
-            await axios.delete(`http://localhost:8000/api/v1/kader/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.delete(`/api/v1/kader/${id}`, { headers: { Authorization: `Bearer ${token}` } });
             fetchData();
         } catch (err) {
             alert(err.response?.data?.message || 'Gagal menghapus Kader');
@@ -200,9 +200,9 @@ export default function KabupatenDashboard() {
         try {
             const token = localStorage.getItem('auth_token');
             if (editBidanData) {
-                await axios.put(`http://localhost:8000/api/v1/bidan/${editBidanData.id}`, bidanForm, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.put(`/api/v1/bidan/${editBidanData.id}`, bidanForm, { headers: { Authorization: `Bearer ${token}` } });
             } else {
-                await axios.post('http://localhost:8000/api/v1/bidan', bidanForm, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.post('/api/v1/bidan', bidanForm, { headers: { Authorization: `Bearer ${token}` } });
             }
             setIsBidanModalOpen(false);
             fetchData();
@@ -215,7 +215,7 @@ export default function KabupatenDashboard() {
         if (!window.confirm('Yakin ingin menghapus Bidan ini?')) return;
         try {
             const token = localStorage.getItem('auth_token');
-            await axios.delete(`http://localhost:8000/api/v1/bidan/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.delete(`/api/v1/bidan/${id}`, { headers: { Authorization: `Bearer ${token}` } });
             fetchData();
         } catch (err) {
             alert(err.response?.data?.message || 'Gagal menghapus Bidan');

@@ -17,7 +17,7 @@ export default function LoginPage() {
 
         try {
             // Adjust the URL if backend runs on a different port (e.g. 8000)
-            const response = await axios.post('http://127.0.0.1:8000/api/v1/login', {
+            const response = await axios.post('/api/v1/login', {
                 email,
                 password
             });

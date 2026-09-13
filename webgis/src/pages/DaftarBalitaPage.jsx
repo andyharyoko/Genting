@@ -11,7 +11,7 @@ export default function DaftarBalitaPage() {
         const fetchBalita = async () => {
             try {
                 const token = localStorage.getItem('auth_token');
-                const response = await axios.get('http://localhost:8000/api/v1/balita', {
+                const response = await axios.get('/api/v1/balita', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setBalitaList(response.data.data);

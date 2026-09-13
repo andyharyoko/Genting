@@ -53,7 +53,7 @@ export default function RiwayatBalitaModal({ isOpen, onClose, balita, onEdit }) 
         setErrorMsg('');
         try {
             const token = localStorage.getItem('auth_token');
-            const response = await axios.get(`http://localhost:8000/api/v1/balita/${balita.id}/riwayat`, {
+            const response = await axios.get(`/api/v1/balita/${balita.id}/riwayat`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -84,7 +84,7 @@ export default function RiwayatBalitaModal({ isOpen, onClose, balita, onEdit }) 
         
         try {
             const token = localStorage.getItem('auth_token');
-            await axios.delete(`http://localhost:8000/api/v1/antropometri/${id}`, {
+            await axios.delete(`/api/v1/antropometri/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchRiwayat();
