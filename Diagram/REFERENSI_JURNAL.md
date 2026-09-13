@@ -286,3 +286,25 @@
 - **Tahun Terbit**: `2024`
 - **DOI**: [https://doi.org/10.1371/journal.pone.0295380](https://doi.org/10.1371/journal.pone.0295380)
 - **Relevansi Arsitektural GentingV2**: Dampak stunting pada perkembangan anak dan evaluasi kebutuhan intervensi terintegrasi
+
+## Tema Tambahan: Landasan Regulasi & Rujukan Spesifik Aksesibilitas Radius Buffer 2 km
+
+### 40. Geographical accessibility and spatial coverage modelling of public health care network in rural and remote India
+- **Sitasi Standar (APA 7th)**: Verma, V. R., & Dash, U. (2020). Geographical accessibility and spatial coverage modelling of public health care network in rural and remote India. *PLOS ONE*, 15(10), e0239326.
+- **Indeksasi**: `Scopus Q1`
+- **Tahun Terbit**: `2020`
+- **DOI**: [https://doi.org/10.1371/journal.pone.0239326](https://doi.org/10.1371/journal.pone.0239326)
+- **Relevansi Arsitektural GentingV2**: Landasan ilmiah utama penentuan radius *Euclidean buffer 2 km* untuk jangkauan layanan rawat jalan dan imunisasi anak di perdesaan (*ambulatory & immunization care*).
+
+### 41. SNI 03-1733-2004: Tata Cara Perencanaan Lingkungan Perumahan di Perkotaan
+- **Sitasi Standar (APA 7th)**: Badan Standardisasi Nasional. (2004). *SNI 03-1733-2004: Tata Cara Perencanaan Lingkungan Perumahan di Perkotaan*. Jakarta: Badan Standardisasi Nasional (BSN).
+- **Indeksasi**: `Standar Nasional Indonesia (Resmi/Otoritatif)`
+- **Tahun Terbit**: `2004`
+- **Relevansi Arsitektural GentingV2**: Rujukan regulasi hierarki fasilitas kesehatan lingkungan perumahan di Indonesia (Posyandu radius 500 m, Pustu 1.500 m, Puskesmas 3.000 m). Angka 2 km merupakan adaptasi realistis untuk kawasan perdesaan dengan moda kendaraan roda dua petugas logistik MBG.
+
+### 42. Analisis faktor perilaku dan jarak fasilitas kesehatan terhadap pemanfaatan posyandu lansia hipertensi di Desa Muntoi Kecamatan Passi Barat
+- **Sitasi Standar (APA 7th)**: Langingi, A. R. C., Sudirman, & Watung, G. I. V. (2020). Analisis faktor perilaku dan jarak fasilitas kesehatan terhadap pemanfaatan posyandu lansia hipertensi di Desa Muntoi Kecamatan Passi Barat. *Medical Technology and Public Health Journal*, 4(2), 121–126.
+- **Indeksasi**: `SINTA 4`
+- **Tahun Terbit**: `2020`
+- **DOI**: [https://doi.org/10.33086/mtphj.v4i2.1757](https://doi.org/10.33086/mtphj.v4i2.1757)
+- **Relevansi Arsitektural GentingV2**: Bukti empiris perdesaan Indonesia bahwa jarak fisik ke posyandu $\ge 500$ m berhubungan signifikan ($p=0,000$) terhadap penurunan aksesibilitas warga, memperkuat urgensi intervensi proaktif Dapur MBG.
